@@ -1,4 +1,4 @@
-## Visualisation of APR calculator in Ethereum
+## Visualization of APR calculator in Ethereum
 
 - To install all requirements: 
 `pip install -r requirements.txt`
