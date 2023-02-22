@@ -3,17 +3,15 @@ import pandas as pd
 import math
 
 
-def run_simulation(n_validators, annual_growth):
+def run_simulation(client_validators, annual_growth):
     current_validators_count = 523715
-    annul_grow = annual_growth
-    client_validators = n_validators
 
     # --- cl
     cl_df = pd.DataFrame()
     cl_df['day'] = range(0, 365, 1)
     cl_df['epoch_in_day'] = 225
-    cl_df['validators'] = range(current_validators_count, current_validators_count + annul_grow - int(annul_grow / 365),
-                                int(annul_grow / 365))
+    cl_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365),
+                                int(annual_growth / 365))
     cl_df['p_for_block_proposal'] = 1 / cl_df['validators'] * 7200
     cl_df['base_reward_per_increment'] = cl_df['validators'].apply(lambda x: 64 / math.sqrt(x * 31.999705 * pow(10, 9)))
     cl_df['issue_per_day'] = cl_df['base_reward_per_increment'] * 32 * cl_df['epoch_in_day'] * cl_df['validators']
@@ -29,13 +27,14 @@ def run_simulation(n_validators, annual_growth):
 
     cl_df['rt_sum_cl'] = cl_df['client_consensus_reward'].cumsum()
 
-    expect_block_cost = 0.1079552666
+    # el
+    expect_block_cost = 0.1079552666 # weighted average by blocks  0 - 100 eth
     el_df = pd.DataFrame()
     el_df['day'] = range(0, 365, 1)
     el_df['epoch_in_day'] = 225
 
-    el_df['validators'] = range(current_validators_count, current_validators_count + annul_grow - int(annul_grow / 365),
-                                int(annul_grow / 365))
+    el_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365),
+                                int(annual_growth / 365))
     el_df['block_proposal'] = 1 / cl_df['validators'] * 7200  # blocks for 1 validator
     el_df['block_proposal_client'] = 1 / cl_df[
         'validators'] * 7200 * client_validators * expect_block_cost  # blocks for client validators
@@ -55,12 +54,12 @@ def main():
     st.title('APR Calculator')
     left_column, right_column = st.columns((2, 5))
 
-    n_validators = left_column.number_input('Number of your validators: ', value=10)
+    client_validators = left_column.number_input('Number of your validators: ', value=10)
     annual_growth = left_column.number_input('Annual network growth:', value=200000)
     start_button = left_column.button('Start Simulation')
 
     if start_button:
-        results = run_simulation(n_validators, annual_growth)
+        results = run_simulation(client_validators, annual_growth)
 
         right_column.line_chart(results, x='day', y='apr')
         #column_3.line_chart(results, x='day', y='apr')
