@@ -8,44 +8,46 @@ def run_simulation(client_validators, annual_growth):
 
     # --- cl
     cl_df = pd.DataFrame()
-    cl_df['day'] = range(0, 365, 1)
+    cl_df['Day'] = range(0, 365, 1)
     cl_df['epoch_in_day'] = 225
-    cl_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365),
-                                int(annual_growth / 365))
+    cl_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365), int(annual_growth / 365))
     cl_df['p_for_block_proposal'] = 1 / cl_df['validators'] * 7200
     cl_df['base_reward_per_increment'] = cl_df['validators'].apply(lambda x: 64 / math.sqrt(x * 31.999705 * pow(10, 9)))
     cl_df['issue_per_day'] = cl_df['base_reward_per_increment'] * 32 * cl_df['epoch_in_day'] * cl_df['validators']
     cl_df['attestation_reward_per_day'] = (14 + 26 + 14) / 64 * 32 * cl_df['base_reward_per_increment'] * 225
-    cl_df['possible_sync_reward_per_day'] = (2 / (32 * 512 * 64)) * cl_df['validators'] * 32 * cl_df[
-        'base_reward_per_increment'] * 7200 * (512 * 225 / 256 / cl_df['validators'])
-    cl_df['possible_proposal_reward_per_day'] = cl_df['validators'] / 32 * 8 / (64 - 8) * cl_df[
-        'attestation_reward_per_day'] / 255 * cl_df['p_for_block_proposal']
+    cl_df['possible_sync_reward_per_day'] = (2 / (32 * 512 * 64)) * cl_df['validators'] * 32 * cl_df['base_reward_per_increment'] * 7200 * (512 * 225 / 256 / cl_df['validators'])
+    cl_df['possible_proposal_reward_per_day'] = cl_df['validators'] / 32 * 8 / (64 - 8) * cl_df['attestation_reward_per_day'] / 255 * cl_df['p_for_block_proposal']
 
-    cl_df['client_consensus_reward'] = (cl_df['attestation_reward_per_day'] + cl_df['possible_sync_reward_per_day'] +
-                                        cl_df[
-                                            'possible_proposal_reward_per_day']) * client_validators
+    cl_df['possible_consensus_reward'] = (cl_df['attestation_reward_per_day'] + cl_df['possible_sync_reward_per_day'] + cl_df['possible_proposal_reward_per_day']) * client_validators
 
-    cl_df['rt_sum_cl'] = cl_df['client_consensus_reward'].cumsum()
+    cl_df['rt_sum_cl'] = cl_df['possible_consensus_reward'].cumsum()
 
     # el
     expect_block_cost = 0.1079552666 # weighted average by blocks  0 - 100 eth
     el_df = pd.DataFrame()
-    el_df['day'] = range(0, 365, 1)
+    el_df['Day'] = range(0, 365, 1)
     el_df['epoch_in_day'] = 225
+    el_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365), int(annual_growth / 365))
 
-    el_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365),
-                                int(annual_growth / 365))
-    el_df['block_proposal'] = 1 / cl_df['validators'] * 7200  # blocks for 1 validator
-    el_df['block_proposal_client'] = 1 / cl_df[
-        'validators'] * 7200 * client_validators * expect_block_cost  # blocks for client validators
+    el_df['possible_execution_reward'] = 1 / cl_df['validators'] * 7200 * client_validators * expect_block_cost  # block values for client validators
 
-    el_df['rt_sum_el'] = el_df['block_proposal_client'].cumsum()
+    el_df['rt_sum_el'] = el_df['possible_execution_reward'].cumsum()
 
-    cl_df = cl_df[['day', 'rt_sum_cl']]
-    el_df = el_df[['day', 'rt_sum_el']]
-    res = cl_df.merge(el_df, how='left', on='day')
-    res['total'] = res['rt_sum_cl'] + res['rt_sum_el']
-    res['apr'] = res['total'] / (client_validators * 32) * 100
+    cl_df = cl_df[['Day', 'possible_consensus_reward', 'rt_sum_cl']]
+    el_df = el_df[['Day', 'possible_execution_reward', 'rt_sum_el']]
+    res = cl_df.merge(el_df, how='left', on='Day')
+    res['cumulative_reward'] = res['rt_sum_cl'] + res['rt_sum_el']
+    res['cumulative_apr'] = res['cumulative_reward'] / (client_validators * 32) * 100
+
+
+    print('consensus:')
+    print(res['possible_consensus_reward'])
+    print('------')
+    print('execution:')
+    print(res['possible_execution_reward'])
+
+    res['possible_total_per_day'] = (res['possible_consensus_reward'] + res['possible_execution_reward'])
+    res['APR'] = res['possible_total_per_day'] / (client_validators * 32) * 365 * 100
 
     return res
 
@@ -61,14 +63,11 @@ def main():
     if start_button:
         results = run_simulation(client_validators, annual_growth)
 
-        right_column.line_chart(results, x='day', y='apr')
-        #column_3.line_chart(results, x='day', y='apr')
-        #column_4.bar_chart(results, x='day', y='apr')
-        #column_5.bar_chart(results, x='day', y='apr')
+        right_column.line_chart(results, x='Day', y='APR')
 
-        st.write(f"30  days rewards: {round(results['total'][29], 3)} ETH")
-        st.write(f"90  days rewards: {round(results['total'][89], 3)} ETH")
-        st.write(f"365 days rewards: {round(results['total'][364], 3)} ETH")
+        st.write(f"1 month rewards: {round(results['cumulative_reward'][29], 3)} ETH")
+        st.write(f"3 months rewards: {round(results['cumulative_reward'][89], 3)} ETH")
+        st.write(f"Year rewards: {round(results['cumulative_reward'][364], 3)} ETH")
 
 
 if __name__ == '__main__':
