@@ -1,6 +1,8 @@
-import streamlit as st
-import pandas as pd
 import math
+import numpy as np
+import pandas as pd
+import scipy
+import streamlit as st
 
 
 def run_simulation(client_validators, annual_growth):
@@ -51,6 +53,24 @@ def run_simulation(client_validators, annual_growth):
 
     return res
 
+def get_confidence_interval(data):
+    # asceding sort
+    sorted_data = sorted(data)
+    n = len(sorted_data)
+    
+    # list of cumulative sums
+    cumsum = np.cumsum(sorted_data)
+
+    median_sum = np.median(cumsum)
+    std_sum = np.std(cumsum)
+    
+    # calculating conf interval for cumsum with 99% proba
+    alpha = 0.01
+    z_score = scipy.stats.norm.ppf(0.99) # 2.576
+    lower_bound = median_sum - z_score * std_sum / np.sqrt(n) - np.sum(sorted_data) * alpha
+    upper_bound = median_sum + z_score * std_sum / np.sqrt(n) + np.sum(sorted_data) * alpha
+    
+    return f'{round(lower_bound, 3)} - {round(upper_bound, 3)} ETH'
 
 def main():
     st.title('APR Calculator')
@@ -65,9 +85,9 @@ def main():
 
         right_column.line_chart(results, x='Day', y='APR')
 
-        st.write(f"1 month rewards: {round(results['cumulative_reward'][29], 3)} ETH")
-        st.write(f"3 months rewards: {round(results['cumulative_reward'][89], 3)} ETH")
-        st.write(f"Year rewards: {round(results['cumulative_reward'][364], 3)} ETH")
+        st.write(f"1 month rewards: {get_confidence_interval(results['possible_total_per_day'].iloc[:30])}")
+        st.write(f"3 months rewards: {get_confidence_interval(results['possible_total_per_day'].iloc[:90])}")
+        st.write(f"Year rewards: {get_confidence_interval(results['possible_total_per_day'].iloc[:365])}")
 
 
 if __name__ == '__main__':
