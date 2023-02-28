@@ -4,6 +4,11 @@ import pandas as pd
 import scipy
 import streamlit as st
 
+hide_streamlit_style = """<style>
+                            #MainMenu {visibility: hidden;}
+                            footer {visibility: hidden;}
+                       </style>"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 def run_simulation(client_validators, annual_growth):
     current_validators_count = 523715
@@ -22,8 +27,6 @@ def run_simulation(client_validators, annual_growth):
 
     cl_df['possible_consensus_reward'] = (cl_df['attestation_reward_per_day'] + cl_df['possible_sync_reward_per_day'] + cl_df['possible_proposal_reward_per_day']) * client_validators
 
-    cl_df['rt_sum_cl'] = cl_df['possible_consensus_reward'].cumsum()
-
     # el
     expect_block_cost = 0.1079552666 # weighted average by blocks  0 - 100 eth
     el_df = pd.DataFrame()
@@ -33,20 +36,9 @@ def run_simulation(client_validators, annual_growth):
 
     el_df['possible_execution_reward'] = 1 / cl_df['validators'] * 7200 * client_validators * expect_block_cost  # block values for client validators
 
-    el_df['rt_sum_el'] = el_df['possible_execution_reward'].cumsum()
-
     cl_df = cl_df[['Day', 'possible_consensus_reward', 'rt_sum_cl']]
     el_df = el_df[['Day', 'possible_execution_reward', 'rt_sum_el']]
     res = cl_df.merge(el_df, how='left', on='Day')
-    res['cumulative_reward'] = res['rt_sum_cl'] + res['rt_sum_el']
-    res['cumulative_apr'] = res['cumulative_reward'] / (client_validators * 32) * 100
-
-
-    print('consensus:')
-    print(res['possible_consensus_reward'])
-    print('------')
-    print('execution:')
-    print(res['possible_execution_reward'])
 
     res['possible_total_per_day'] = (res['possible_consensus_reward'] + res['possible_execution_reward'])
     res['APR'] = res['possible_total_per_day'] / (client_validators * 32) * 365 * 100
@@ -79,6 +71,8 @@ def main():
     client_validators = left_column.number_input('Number of your validators: ', value=10)
     annual_growth = left_column.number_input('Annual network growth:', value=200000)
     start_button = left_column.button('Start Simulation')
+    left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; color: white;'>Try it yourself</a>", 
+                         unsafe_allow_html=True)
 
     if start_button:
         results = run_simulation(client_validators, annual_growth)
