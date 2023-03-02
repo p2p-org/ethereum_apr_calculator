@@ -1,4 +1,3 @@
-import random
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -21,13 +20,16 @@ def main():
     client_validators = left_column.number_input('Number of your validators: ', value=10)
     annual_growth = left_column.number_input('Annual network growth:', value=300000)
     start_button = left_column.button('Start Simulation')
-    left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; color: white;'>Try it yourself</a>", 
+    left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; '>Try it yourself</a>", 
                          unsafe_allow_html=True)
 
     if start_button:
         data = run_simulation(client_validators, annual_growth)
 
-        scatter_plot = alt.Chart(data).mark_point(color='green').encode(x='Day', y='APR')
+        scatter_plot = alt.Chart(data).mark_point(color='orangered').encode(
+                                                                    x='Day', 
+                                                                    y=alt.Y('APR', axis=alt.Axis(title='APR, %'))
+                                                                    )
         diagram = right_column.altair_chart(scatter_plot, use_container_width=True)
 
         spread = list()
@@ -36,11 +38,15 @@ def main():
             min_apr = data['APR'].iloc[i-1]*(1-deviation)
             max_apr = data['APR'].iloc[i-1]*(1+deviation)
 
-            for _ in range(random.randint(3, 5)):
-                spread.append({'Day': i, 'APR': np.random.uniform(min_apr, max_apr)})
+            for _ in range(np.random.randint(3, 4 + 18*(SIM_DAYS-i)/SIM_DAYS)):
+                APR = np.random.uniform(min_apr, max_apr)
+                spread.append({'Day': i, 'APR': APR})
 
-        spread = pd.DataFrame(spread)
-        scatter_plot = scatter_plot + alt.Chart(spread).mark_point().encode(x='Day', y='APR')
+        scatter_plot += alt.Chart(pd.DataFrame(spread)).mark_point(opacity=0.35, size=1.5).encode(
+                                                                                        x='Day', 
+                                                                                        y=alt.Y('APR', axis=alt.Axis(title='APR, %'))
+                                                                                        )
+
         diagram.altair_chart(scatter_plot, use_container_width=True)
 
 
