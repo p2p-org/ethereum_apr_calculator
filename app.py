@@ -7,7 +7,7 @@ from core import run_simulation, get_confidence_interval
 
 SIM_DAYS = 365
 
-st.title('APR Calculator')
+st.title('Ethereum staking APR simulator') # prediction, modelling
 hide_streamlit_style = """<style>
                             #MainMenu {visibility: hidden;}
                             footer {visibility: hidden;}
