@@ -9,6 +9,7 @@ from core import run_simulation, get_confidence_interval
 SIM_DAYS = 365
 
 st.title('Ethereum staking APR simulator') # prediction, modelling
+st.markdown('We are calculating the probabilities of Ethereum network possible events in real time to clearly demonstrate to you all the existing outcomes of the future. Measure your APR and rewards!')
 hide_streamlit_style = """<style>
                             #MainMenu {visibility: hidden;}
                             footer {visibility: hidden;}
@@ -20,13 +21,13 @@ def main():
 
     client_validators = left_column.number_input('Number of your validators: ', value=10)
     annual_growth = left_column.number_input('Annual network growth:', value=300000)
-    start_button = left_column.button('Start Simulation')
+    start_button = left_column.button('Start simulation')
     left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; '>Try it yourself</a>", 
                          unsafe_allow_html=True)
 
     if start_button:
         with st.spinner('Simulating...'):
-            time.sleep(3)
+            time.sleep(5)
         data = run_simulation(client_validators, annual_growth)
 
         scatter_plot = alt.Chart(data).mark_point(color='orangered').encode(
@@ -57,8 +58,6 @@ def main():
                                                                                         )
 
         diagram.altair_chart(scatter_plot, use_container_width=True)
-
-        
         st.table(pd.DataFrame(table_content, columns=['Rewards', 'APR', 'Block >1 ETH probability'], index=['1 month', '3 months', 'Year']))
 
 
