@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -24,6 +25,8 @@ def main():
                          unsafe_allow_html=True)
 
     if start_button:
+        with st.spinner('Simulating...'):
+            time.sleep(3)
         data = run_simulation(client_validators, annual_growth)
 
         scatter_plot = alt.Chart(data).mark_point(color='orangered').encode(
@@ -38,10 +41,10 @@ def main():
             min_apr = data['APR'].iloc[i-1]*(1-deviation)
             max_apr = data['APR'].iloc[i-1]*(1+deviation)
 
-            if i in [30, 90, 365]:
+            if i in (30, 90, 365):
                 reward_range = f'{round(min_rwd, 3)} - {round(max_rwd, 3)} ETH'
-                apr_range = f'{round(min_apr, 2)} - {round(max_apr, 3)} %'
-                huge_block_proba = f'0.002 %'
+                apr_range = f'{round(min_apr, 2)} - {round(max_apr, 2)} %'
+                huge_block_proba = f'{round(data["huge_block_probability"].iloc[:i].sum(), 3)} %'
                 table_content.append([reward_range, apr_range, huge_block_proba])
 
             for _ in range(np.random.randint(3, 4 + 18*(SIM_DAYS-i)/SIM_DAYS)):
@@ -56,7 +59,7 @@ def main():
         diagram.altair_chart(scatter_plot, use_container_width=True)
 
         
-        st.table(pd.DataFrame(table_content, columns=['Rewards', 'APR', 'Huge block probability'], index=['1 month', '3 months', 'Year']))
+        st.table(pd.DataFrame(table_content, columns=['Rewards', 'APR', 'Block >1 ETH probability'], index=['1 month', '3 months', 'Year']))
 
 
 if __name__ == '__main__':
