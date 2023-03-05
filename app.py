@@ -32,11 +32,17 @@ def main():
                                                                     )
         diagram = right_column.altair_chart(scatter_plot, use_container_width=True)
 
-        spread = list()
+        table_content, spread = list(), list()
         for i in range(1, SIM_DAYS+1):
-            deviation = get_confidence_interval(data['possible_total_per_day'].iloc[:i])[1]
+            min_rwd, max_rwd, deviation = get_confidence_interval(data['possible_total_per_day'].iloc[:i])
             min_apr = data['APR'].iloc[i-1]*(1-deviation)
             max_apr = data['APR'].iloc[i-1]*(1+deviation)
+
+            if i in [30, 90, 365]:
+                reward_range = f'{round(min_rwd, 3)} - {round(max_rwd, 3)} ETH'
+                apr_range = f'{round(min_apr, 2)} - {round(max_apr, 3)} %'
+                huge_block_proba = f'0.002 %'
+                table_content.append([reward_range, apr_range, huge_block_proba])
 
             for _ in range(np.random.randint(3, 4 + 18*(SIM_DAYS-i)/SIM_DAYS)):
                 APR = np.random.uniform(min_apr, max_apr)
@@ -49,10 +55,8 @@ def main():
 
         diagram.altair_chart(scatter_plot, use_container_width=True)
 
-
-        st.write(f"1 month rewards: {get_confidence_interval(data['possible_total_per_day'].iloc[:30])[0]}")
-        st.write(f"3 months rewards: {get_confidence_interval(data['possible_total_per_day'].iloc[:90])[0]}")
-        st.write(f"Year rewards: {get_confidence_interval(data['possible_total_per_day'].iloc[:365])[0]}")
+        
+        st.table(pd.DataFrame(table_content, columns=['Rewards', 'APR', 'Huge block probability'], index=['1 month', '3 months', 'Year']))
 
 
 if __name__ == '__main__':

@@ -58,4 +58,4 @@ def get_confidence_interval(data):
     
     deviation = (1 - lower_bound/((lower_bound + upper_bound)/2))
     
-    return f'{round(lower_bound, 3)} - {round(upper_bound, 3)} ETH', deviation
+    return lower_bound, upper_bound, deviation
