@@ -1,0 +1,58 @@
+steps:
+  # Build and Push ethereum_apr_calculator
+  - name: gcr.io/kaniko-project/executor:v1.9.1
+    args:
+      - --dockerfile=Dockerfile
+      - --destination=eu.gcr.io/webdev-cube/ethereum_apr_calculator:${_BUILD_TAG}
+      - --cache=true
+
+  # Update revision in github repo
+  - name: eu.gcr.io/webdev-cube/k8s-specs-patch:v1
+    entrypoint: 'bash'
+    args:
+      - '-eEuo'
+      - 'pipefail'
+      - '-c'
+      - |-
+        echo "$$K8S_SPECS_KEY" > /root/.ssh/id_rsa
+        chmod 400 /root/.ssh/id_rsa
+        AUTHOR_NAME=$$(git log -1 --pretty=format:'%an')
+        AUTHOR_EMAIL=$$(git log -1 --pretty=format:'%ae')
+
+        git clone git@github.com:p2p-org/p2pwebsite-k8s-specs.git
+        cd p2pwebsite-k8s-specs
+
+        kubectl patch --local -f dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml -p '{"spec":{"template":{"spec":{"containers":[{"name":"app","image":"eu.gcr.io/webdev-cube/ethereum-apr-calculator:${_BUILD_TAG}"}]}}}}' -o yaml | sponge dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml
+
+        git config --local user.name $$AUTHOR_NAME
+        git config --local user.email $$AUTHOR_EMAIL
+        git commit -am "Update ethereum_apr_calculator to ${_BUILD_TAG}" && git push || true
+    secretEnv:
+      - K8S_SPECS_KEY
+
+  # trigger argocd sync
+  - name: quay.io/argoproj/argocd:v2.5.10
+    args:
+      - argocd
+      - app
+      - sync
+      - ethereum-apr-calculator-dev
+    env:
+      - ARGOCD_OPTS=--grpc-web --insecure
+      - ARGOCD_SERVER=argo.dev-p2p.org
+    secretEnv:
+      - ARGOCD_AUTH_TOKEN
+
+tags: ['dev']
+availableSecrets:
+  secretManager:
+  - versionName: projects/773594071372/secrets/argocd-p2pwebsite-dev-ci-role-token/versions/1
+    env: ARGOCD_AUTH_TOKEN
+  - versionName: projects/773594071372/secrets/github-p2pwebsite-k8s-specs-deploy-key/versions/2
+    env: K8S_SPECS_KEY
+logsBucket: gs://p2pwebsite-protected-logs
+options:
+  pool:
+    name: 'projects/webdev-cube/locations/europe-west4/workerPools/worker-pool'
+  logging: GCS_ONLY
+timeout: 900s # 15 min
