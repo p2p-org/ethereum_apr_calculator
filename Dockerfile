@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim-bullseye
+FROM python:3.10.10-slim-bullseye
 ENV VIRTUAL_ENV=/home/appuser/venv
 
 RUN groupadd --gid 1000 appuser \
