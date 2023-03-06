@@ -22,7 +22,7 @@ steps:
         git clone git@github.com:p2p-org/p2pwebsite-k8s-specs.git
         cd p2pwebsite-k8s-specs
 
-        kubectl patch --local -f dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml -p '{"spec":{"template":{"spec":{"containers":[{"name":"app","image":"eu.gcr.io/webdev-cube/ethereum-apr-calculator:${_BUILD_TAG}"}]}}}}' -o yaml | sponge dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml
+        kubectl patch --local -f dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml -p '{"spec":{"template":{"spec":{"containers":[{"name":"app","image":"eu.gcr.io/webdev-cube/ethereum_apr_calculator:${_BUILD_TAG}"}]}}}}' -o yaml | sponge dev/ethereum-apr-calculator/ethereum-apr-calculator.Deployment.yaml
 
         git config --local user.name $$AUTHOR_NAME
         git config --local user.email $$AUTHOR_EMAIL
