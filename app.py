@@ -4,18 +4,20 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 from core import run_simulation, get_confidence_interval
+from typography import text, refurl
 
 
 SIM_DAYS = 365
-st.set_page_config(page_title='Ethereum APR simulator', page_icon='favicon.ico')
-st.title("[P2P.org](https://p2p.org/networks/ethereum/staking-application) Ethereum staking APR simulator") # prediction, modelling
 
-st.markdown('We are calculating the probabilities of Ethereum network possible events in real time to clearly demonstrate to you all the existing outcomes of the future. Measure your APR and rewards!')
-hide_streamlit_style = """<style>
-                            #MainMenu {visibility: hidden;}
-                            footer {visibility: hidden;}
-                       </style>"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+st.set_page_config(page_title='Ethereum APR simulator', page_icon='img/favicon.ico')
+with open( "css/style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
+st.title(text['title'])
+st.markdown(text['subtitle']) 
+st.markdown(text['legend'])
+
+
 
 def main():
     left_column, right_column = st.columns((2, 5), gap='medium')
@@ -23,7 +25,7 @@ def main():
     client_validators = left_column.number_input('Number of your validators: ', value=10)
     annual_growth = left_column.number_input('Annual network growth:', value=200000)
     start_button = left_column.button('Start simulation')
-    left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; '>Try it yourself</a>", 
+    left_column.markdown(f"<a href='{refurl}' style='text-align: left; '>Try it yourself</a>", 
                          unsafe_allow_html=True)
 
     if start_button:

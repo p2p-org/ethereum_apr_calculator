@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
+.css-91z34k {
+    width: 100%;
+    padding: 6rem 1rem 10rem;
+    max-width: 59rem;
+}
+
+#MainMenu {
+    visibility: hidden;
+}
+footer {
+    visibility: hidden;
+}
+
+div.stButton button:first-child {
+    background: #1347FF;
+    color:#FFFFFF;
+}
+
+div.stButton button:hover {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)),
+    linear-gradient(0deg, #1347FF, #1347FF);
+    color:#FFFFFF;
+}
+
+.css-1kurwtk:focus:not(:active) {
+    color:#FFFFFF;
+}
