@@ -9,7 +9,7 @@ def run_simulation(client_validators, annual_growth, sim_days):
 
     # cl
     cl_df = pd.DataFrame()
-    cl_df['Day'] = range(sim_days)
+    cl_df['Day'] = range(1, sim_days+1)
     cl_df['epoch_in_day'] = 225
     cl_df['validators'] = np.linspace(start_validators, start_validators + annual_growth, sim_days, dtype=int)
     cl_df['p_for_block_proposal'] = 1 / cl_df['validators'] * 7200
