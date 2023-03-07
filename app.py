@@ -7,8 +7,9 @@ from core import run_simulation, get_confidence_interval
 
 
 SIM_DAYS = 365
+st.set_page_config(page_title='Ethereum APR simulator', page_icon='favicon.ico')
+st.title("[P2P.org](https://p2p.org/networks/ethereum/staking-application) Ethereum staking APR simulator") # prediction, modelling
 
-st.title('Ethereum staking APR simulator') # prediction, modelling
 st.markdown('We are calculating the probabilities of Ethereum network possible events in real time to clearly demonstrate to you all the existing outcomes of the future. Measure your APR and rewards!')
 hide_streamlit_style = """<style>
                             #MainMenu {visibility: hidden;}
@@ -17,24 +18,23 @@ hide_streamlit_style = """<style>
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 def main():
-    left_column, right_column = st.columns((2, 5))
+    left_column, right_column = st.columns((2, 5), gap='medium')
 
     client_validators = left_column.number_input('Number of your validators: ', value=10)
-    annual_growth = left_column.number_input('Annual network growth:', value=300000)
+    annual_growth = left_column.number_input('Annual network growth:', value=200000)
     start_button = left_column.button('Start simulation')
     left_column.markdown("<a href='https://p2p.org/networks/ethereum/staking-application' style='text-align: left; '>Try it yourself</a>", 
                          unsafe_allow_html=True)
 
     if start_button:
         with st.spinner('Simulating...'):
-            time.sleep(5)
+            time.sleep(3)
         data = run_simulation(client_validators, annual_growth)
 
         scatter_plot = alt.Chart(data).mark_point(color='orangered').encode(
                                                                     x='Day', 
                                                                     y=alt.Y('APR', axis=alt.Axis(title='APR, %'))
                                                                     )
-        diagram = right_column.altair_chart(scatter_plot, use_container_width=True)
 
         table_content, spread = list(), list()
         for i in range(1, SIM_DAYS+1):
@@ -57,7 +57,7 @@ def main():
                                                                                         y=alt.Y('APR', axis=alt.Axis(title='APR, %'))
                                                                                         )
 
-        diagram.altair_chart(scatter_plot, use_container_width=True)
+        right_column.altair_chart(scatter_plot, use_container_width=True)
         st.table(pd.DataFrame(table_content, columns=['Rewards', 'APR', 'Block >1 ETH probability'], index=['1 month', '3 months', 'Year']))
 
 
