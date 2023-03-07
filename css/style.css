@@ -6,7 +6,7 @@ html, body, [class*="css"] {
 
 .css-91z34k {
     width: 100%;
-    padding: 6rem 1rem 10rem;
+    padding: 3rem 1rem 0rem;
     max-width: 59rem;
 }
 
@@ -14,6 +14,9 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 footer {
+    visibility: hidden;
+}
+header {
     visibility: hidden;
 }
 
@@ -28,6 +31,10 @@ div.stButton button:hover {
     color:#FFFFFF;
 }
 
-.css-1kurwtk:focus:not(:active) {
+div.stButton p {
+    font-weight: 600;
+}
+
+div.stButton .css-1kurwtk:focus:not(:active) {
     color:#FFFFFF;
 }

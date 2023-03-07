@@ -14,8 +14,8 @@ with open( "css/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 st.title(text['title'])
-st.markdown(text['subtitle']) 
-st.markdown(text['legend'])
+st.markdown(text['subtitle'], unsafe_allow_html=True) 
+st.markdown(text['legend'], unsafe_allow_html=True)
 
 
 
