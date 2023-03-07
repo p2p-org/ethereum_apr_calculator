@@ -4,14 +4,14 @@ import pandas as pd
 import scipy
 
 
-def run_simulation(client_validators, annual_growth):
-    current_validators_count = 550715
+def run_simulation(client_validators, annual_growth, sim_days):
+    start_validators = 550_715
 
     # cl
     cl_df = pd.DataFrame()
-    cl_df['Day'] = range(365)
+    cl_df['Day'] = range(sim_days)
     cl_df['epoch_in_day'] = 225
-    cl_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365), int(annual_growth / 365))
+    cl_df['validators'] = np.linspace(start_validators, start_validators + annual_growth, sim_days, dtype=int)
     cl_df['p_for_block_proposal'] = 1 / cl_df['validators'] * 7200
     cl_df['base_reward_per_increment'] = cl_df['validators'].apply(lambda x: 64 / math.sqrt(x * 31.999705 * pow(10, 9)))
     cl_df['issue_per_day'] = cl_df['base_reward_per_increment'] * 32 * cl_df['epoch_in_day'] * cl_df['validators']
@@ -24,9 +24,8 @@ def run_simulation(client_validators, annual_growth):
     # el
     expect_block_cost = 0.1079552666 # weighted average by blocks  0 - 100 eth
     el_df = pd.DataFrame()
-    el_df['Day'] = range(365)
+    el_df['Day'] = cl_df['Day']
     el_df['huge_block_probability'] = cl_df['p_for_block_proposal'] * (cl_df['validators'] - client_validators) / cl_df['validators'] * client_validators * 0.01 * 100 # 0.01 is proven proba, 100 for %
-    el_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365), int(annual_growth / 365))
 
     el_df['possible_execution_reward'] = cl_df['p_for_block_proposal'] * client_validators * expect_block_cost  # block values for client validators
 

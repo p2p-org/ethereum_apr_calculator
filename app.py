@@ -31,7 +31,7 @@ def main():
     if start_button:
         with st.spinner('Simulating...'):
             time.sleep(3)
-        data = run_simulation(client_validators, annual_growth)
+        data = run_simulation(client_validators, annual_growth, SIM_DAYS)
 
         scatter_plot = alt.Chart(data).mark_point(color='orangered').encode(
                                                                     x='Day', 
