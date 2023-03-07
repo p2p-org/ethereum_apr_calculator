@@ -22,7 +22,7 @@ st.markdown(text['legend'])
 def main():
     left_column, right_column = st.columns((2, 5), gap='medium')
 
-    client_validators = left_column.number_input('Number of your validators: ', value=10)
+    client_validators = left_column.number_input('Number of your validators: ', value=10, min_value=1)
     annual_growth = left_column.number_input('Annual network growth:', value=200000)
     start_button = left_column.button('Start simulation')
     left_column.markdown(f"<a href='{refurl}' style='text-align: left; '>Try it yourself</a>", 
@@ -47,7 +47,7 @@ def main():
             if i in (30, 90, 365):
                 reward_range = f'{round(min_rwd, 3)} - {round(max_rwd, 3)} ETH'
                 apr_range = f'{round(min_apr, 2)} - {round(max_apr, 2)} %'
-                huge_block_proba = f'{round(data["huge_block_probability"].iloc[:i].sum(), 3)} %'
+                huge_block_proba = f'{round(data["huge_block_probability"].iloc[:i].sum(), 2)} %' if data["huge_block_probability"].iloc[:i].sum() < 100 else '99.99 %'
                 table_content.append([reward_range, apr_range, huge_block_proba])
 
             for _ in range(np.random.randint(3, 4 + 18*(SIM_DAYS-i)/SIM_DAYS)):

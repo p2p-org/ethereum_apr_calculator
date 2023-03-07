@@ -25,10 +25,10 @@ def run_simulation(client_validators, annual_growth):
     expect_block_cost = 0.1079552666 # weighted average by blocks  0 - 100 eth
     el_df = pd.DataFrame()
     el_df['Day'] = range(365)
-    el_df['huge_block_probability'] = cl_df['p_for_block_proposal'] * 0.01 * 100 # 0.01 is proven proba, 100 for %
+    el_df['huge_block_probability'] = cl_df['p_for_block_proposal'] * (cl_df['validators'] - client_validators) / cl_df['validators'] * client_validators * 0.01 * 100 # 0.01 is proven proba, 100 for %
     el_df['validators'] = range(current_validators_count, current_validators_count + annual_growth - int(annual_growth / 365), int(annual_growth / 365))
 
-    el_df['possible_execution_reward'] = 1 / cl_df['validators'] * 7200 * client_validators * expect_block_cost  # block values for client validators
+    el_df['possible_execution_reward'] = cl_df['p_for_block_proposal'] * client_validators * expect_block_cost  # block values for client validators
 
     cl_df = cl_df[['Day', 'possible_consensus_reward']]
     el_df = el_df[['Day', 'possible_execution_reward', 'huge_block_probability']]
