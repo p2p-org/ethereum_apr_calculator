@@ -54,4 +54,4 @@ options:
   pool:
     name: 'projects/webdev-cube/locations/europe-west4/workerPools/worker-pool'
   logging: GCS_ONLY
-timeout: 900s # 15 min
+timeout: 1800s # 30 min
